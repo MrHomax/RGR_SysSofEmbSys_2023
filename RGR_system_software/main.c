@@ -2,10 +2,10 @@
 #include "Discriminant.h"
 #include "Roots.h"
 #include <stdio.h>
-#include <math.h>
+//#include <math.h>
 
 int main() {
-    double a, b, c, x1, x2;
+    double a, b, c, x1, x2, disc;
     int num_roots;
 
     // Запитуємо коефіцієнти від користувача
@@ -13,7 +13,8 @@ int main() {
     scanf("%lf %lf %lf", &a, &b, &c);
 
     // Обчислюємо корені рівняння
-    roots(a, b, c, &num_roots, &x1, &x2);
+    disc = discriminant(a, b, c);
+    roots(a, b, c, disc, &num_roots, &x1, &x2);
 
     // Виводимо результат
     if (num_roots == 2) {
