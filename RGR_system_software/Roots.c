@@ -1,11 +1,8 @@
-#include "Roots.h"
-#include "Discriminant.h"
-#include <stdio.h>
 #include <math.h>
+#include "Roots.h"
 
 // Функція для обчислення коренів рівняння
-void roots(double a, double b, double c, int* num_roots, double* x1, double* x2) {
-    double disc = discriminant(a, b, c);
+void roots(double a, double b, double c, double disc, int* num_roots, double* x1, double* x2) {
 
     if (disc > 0) {
         *num_roots = 2;

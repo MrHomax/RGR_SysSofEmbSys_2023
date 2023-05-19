@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# Функція для виведення довідки
+show_help() {
+    echo "Довідка:"
+    echo "  h або H - показати цю довідку"
+    echo "  y або Y - запустити програму без задання кількості повторів"
+    echo "  n або N - задати кількість повторів"
+    echo ""
+}
+
+# Перевірка на дійсні числа
+is_valid_number() {
+    re='^[+-]?[0-9]+([.][0-9]+)?$'
+    if ! [[ $1 =~ $re ]]; then
+        echo "Помилка: '$1' не є дійсним числом."
+        exit 1
+    fi
+}
+
+# Запуск програми APP_RGR з переданими параметрами
+run_app() {
+    echo "Запуск програми APP_RGR з параметрами: $1, $2, $3"
+    ./APP_RGR "$1" "$2" "$3"
+    #echo "$1"
+    #echo "$2"
+    #echo "$3"
+}
+
+# Головна функція
+main() {
+    # Перевірка наявності виконуваного файлу APP_RGR
+    if [ ! -x "./APP_RGR" ]; then
+        echo "Помилка: Неможливо знайти або виконати файл APP_RGR."
+        exit 1
+    fi
+
+    # Запитання про показ довідки
+    read -p "Чи хочете ви побачити довідку по роботі зі скриптом? (h або H): " help_choice
+    if [[ $help_choice == "h" || $help_choice == "H" ]]; then
+        show_help
+    fi
+
+    # Запуск програми без запитань
+    read -p "Запустити програму без задання кількості повторів? (y або Y - так, будь-що інше - ні): " run_choice
+    if [[ $run_choice == "y" || $run_choice == "Y" ]]; then
+        run_app
+        exit 0
+    fi
+
+    # Запуск програми з заданою кількістю повторів
+    read -p "Введіть кількість повторів: " repeat_count
+    is_valid_number "$repeat_count"
+
+    # Зчитування параметрів для кожного повтору
+    for ((i=1; i<=repeat_count; i++)); do
+        read -p "Введіть параметр A для повтору $i: " param_a
+        read -p "Введіть параметр B для повтору $i: " param_b
+        read -p "Введіть параметр C для повтору $i: " param_c
+
+        is_valid_number "$param_a"
+        is_valid_number "$param_b"
+        is_valid_number "$param_c"
+
+        run_app "$param_a" "$param_b" "$param_c"
+    done
+}
+
+# Виклик головної функції
+main
