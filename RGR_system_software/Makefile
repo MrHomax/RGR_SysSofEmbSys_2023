@@ -2,40 +2,39 @@ CC=gcc
 TARGET=APP_RGR
 BUILD_DIR=build
 #BUILD_DIR=~/RGR/RGR_SysSofEmbSys_2023/RGR_system_software
-LIBRARY_TYPE?=static
-#LIBRARY_TYPE=shared
+LIBRARY_TYPE?=object
+#LIBRARY_TYPE=static
 
 # Список об'єктних файлів, які потрібно скомпілювати
-#OBJECTS=$(addprefix $(BUILD_DIR)/, main.o Add_matrix.o Multiply_matrix.o Subtract_matrix.o)
 ifeq ($(LIBRARY_TYPE), static)
 	OBJECTS=$(addprefix $(BUILD_DIR)/, main.o libfunc.a)
 else
-	OBJECTS=$(addprefix $(BUILD_DIR)/, main.o libfunc.so)
+	OBJECTS=$(addprefix $(BUILD_DIR)/, main.o Discriminant.o Roots.o)
 endif
 
 # Компілювати зі статичною або спільною бібліотекою
 ifeq ($(LIBRARY_TYPE), static)
 	LIBRARY_FLAG=-static
 	LIBRARY_NAME=libfunc.a
-	LIBRARY_F=
-else
-	LIBRARY_FLAG=-shared
-	LIBRARY_NAME=libfunc.so
-	LIBRARY_F=-fPIC
 endif
 
 # Задаємо змінні середовища для компілятора та лінкера
-CFLAGS ?=
+ALL_WARNINGS ?=
+ifeq ($(ALL_WARNINGS), 1)
+	CFLAGS=-Wall
+else
+	CFLAGS ?=
+endif
 LDFLAGS=-lm
 
-# Створення виконуваного файлу
+# Створення виконуваного файлу Linking
 all: $(BUILD_DIR)/$(TARGET)
 
 $(BUILD_DIR)/$(TARGET): $(OBJECTS) | $(BUILD_DIR)/$(LIBRARY_NAME)
 ifeq ($(LIBRARY_TYPE), static)
 	$(CC) $(OBJECTS) -lfunc -L./$(BUILD_DIR) $(LDFLAGS) -o $@
 else
-	$(CC) $(LDFLAGS) $(OBJECTS) -lfunc -L./$(BUILD_DIR) -o $@
+	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 endif
 
 # Компіляція коду
@@ -43,20 +42,17 @@ $(BUILD_DIR)/main.o: main.c Discriminant.h Roots.h | $(BUILD_DIR)
 	$(CC) -c $< $(CFLAGS) -o $@
 
 $(BUILD_DIR)/Discriminant.o: Discriminant.c Discriminant.h | $(BUILD_DIR)
-	$(CC) $(LIBRARY_F) -c $< $(CFLAGS) -o $@
+	$(CC) -c $< $(CFLAGS) -o $@
 
 $(BUILD_DIR)/Roots.o: Roots.c Roots.h | $(BUILD_DIR)
-	$(CC) $(LIBRARY_F) -c $< $(CFLAGS) -o $@
+	$(CC) -c $< $(CFLAGS) -o $@
 
 
 # Створення бібліотеки
 $(BUILD_DIR)/$(LIBRARY_NAME): $(addprefix $(BUILD_DIR)/, Discriminant.o Roots.o)
 ifeq ($(LIBRARY_TYPE), static)
 	ar rcs $@ $^
-else
-	$(CC) $(LIBRARY_FLAG) -Wl,-soname,libfunc.so -o $(BUILD_DIR)/libfunc.so $^ -lc
 endif
-
 
 # Ціль для статичного аналізу коду
 .PHONY: check

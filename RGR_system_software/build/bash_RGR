@@ -1,13 +1,6 @@
 #!/bin/bash
 
-# Функція для виведення довідки
-show_help() {
-    echo "Довідка:"
-    echo "  h або H - показати цю довідку"
-    echo "  y або Y - запустити програму без задання кількості повторів"
-    echo "  n або N - задати кількість повторів"
-    echo ""
-}
+flag_run_choice=false
 
 # Перевірка на дійсні числа
 is_valid_number() {
@@ -18,14 +11,26 @@ is_valid_number() {
     fi
 }
 
-# Запуск програми APP_RGR з переданими параметрами
-run_app() {
-    echo "Запуск програми APP_RGR з параметрами: $1, $2, $3"
-    ./APP_RGR "$1" "$2" "$3"
-    #echo "$1"
-    #echo "$2"
-    #echo "$3"
+
+num_2_roots=0
+num_1_roots=0
+num_0_roots=0
+
+# Функція для виведення довідки
+show_help() {
+    echo "Довідка:"
+    echo "  1. Запустити програму знову? (y або Y - так, n або N - ні)"
+    echo "      Якщо обрати 'y' або 'Y' то запустить програму повторно і"
+    echo "      запитає це знову."
+    echo "      Якщо обрати 'n' або 'N' то перейде до наступного запитання"
+    echo ""
+    echo "  2. Запустити програму з заданою кількістю повторів? (y або Y - так, n або N - ні)"
+    echo "      Якщо обрати 'y' або 'Y' то запитає кількість повторів та "
+    echo "      виведе статистику."
+    echo "      Якщо обрати 'n' або 'N' то закінчиться робота скрипта."
+    echo ""
 }
+
 
 # Головна функція
 main() {
@@ -34,37 +39,117 @@ main() {
         echo "Помилка: Неможливо знайти або виконати файл APP_RGR."
         exit 1
     fi
-
-    # Запитання про показ довідки
-    read -p "Чи хочете ви побачити довідку по роботі зі скриптом? (h або H): " help_choice
-    if [[ $help_choice == "h" || $help_choice == "H" ]]; then
-        show_help
+    #Перший запуск програми
+    if [[ $# == 2 ]]; then
+        ./APP_RGR "$param_a" "$param_b"
+    elif [[ $# == 1 ]]; then
+        ./APP_RGR "$param_a"
+    elif [[ $# == 0 ]]; then
+        ./APP_RGR
+    else
+        ./APP_RGR "$param_a" "$param_b" "$param_c"
     fi
 
-    # Запуск програми без запитань
-    read -p "Запустити програму без задання кількості повторів? (y або Y - так, будь-що інше - ні): " run_choice
-    if [[ $run_choice == "y" || $run_choice == "Y" ]]; then
-        run_app
-        exit 0
-    fi
+    #echo "Параметри: $param_a $param_b $param_c"
+    while true; do
+         # Запитання про показ довідки
+        if [[ $flag_run_choice == false ]]; then
+            read -p "Довідка по роботі зі скриптом (h або H, n або N - ні): " help_choice
+            if [[ $help_choice == "h" || $help_choice == "H" ]]; then
+                show_help
+            fi
+        fi
 
-    # Запуск програми з заданою кількістю повторів
-    read -p "Введіть кількість повторів: " repeat_count
-    is_valid_number "$repeat_count"
+        # Запуск програми без запитань
+        read -p "Запустити програму знову? (y або Y - так, n або N - ні): " run_choice
+        if [[ $run_choice == "y" || $run_choice == "Y" ]]; then
+            
+            if [[ $# == 2 ]]; then
+                ./APP_RGR "$param_a" "$param_b"
+            elif [[ $# == 1 ]]; then
+                ./APP_RGR "$param_a"
+            elif [[ $# == 0 ]]; then
+                ./APP_RGR
+            else
+                ./APP_RGR "$param_a" "$param_b" "$param_c"
+            fi
 
-    # Зчитування параметрів для кожного повтору
-    for ((i=1; i<=repeat_count; i++)); do
-        read -p "Введіть параметр A для повтору $i: " param_a
-        read -p "Введіть параметр B для повтору $i: " param_b
-        read -p "Введіть параметр C для повтору $i: " param_c
+            flag_run_choice=false
 
-        is_valid_number "$param_a"
-        is_valid_number "$param_b"
-        is_valid_number "$param_c"
+        elif [[ $run_choice == "n" || $run_choice == "N" ]]; then
+            read -p "Запустити програму з заданою кількістю повторів чи вийти? (y або Y - так, n або N - вийти): " run_choice
+            if [[ $run_choice == "y" || $run_choice == "Y" ]]; then
+                
+                flag_run_choice=true
+                # Запуск програми з заданою кількістю повторів
+                read -p "Введіть кількість повторів: " repeat_count
+                is_valid_number "$repeat_count"
+               
+                for ((i=1; i<=repeat_count; i++)); do
+                    if [[ $# == 2 ]]; then
+                        ./APP_RGR "$param_a" "$param_b"
+                    elif [[ $# == 1 ]]; then
+                        ./APP_RGR "$param_a"
+                    elif [[ $# == 0 ]]; then
+                        ./APP_RGR
+                    else
+                        ./APP_RGR "$param_a" "$param_b" "$param_c"
+                    fi
+                    #./APP_RGR "$param_a" "$param_b" "$param_c"
+                    #read -p "" output
+                    output=$?
+                    if [[ $output == "0" ]]; then
+                        ((num_2_roots++))
+                    elif [[ $output == "1" ]]; then
+                        ((num_1_roots++))
+                    elif [[ $output == "2" ]]; then
+                        ((num_0_roots++))
+                    fi
+                done
+                echo "Кількість рішень з 2 коренями: $num_2_roots"
+                echo "Кількість рішень з 1 коренем: $num_1_roots"
+                echo "Кількість без розв'язку: $num_0_roots"
 
-        run_app "$param_a" "$param_b" "$param_c"
+            elif [[ $run_choice == "n" || $run_choice == "N" ]]; then
+                exit 1  # Завершення з кодом виходу 1
+            fi
+        fi
+        num_2_roots=0
+        num_1_roots=0
+        num_0_roots=0
+        # Запитання про повторний запуск у режимі без запитань
+        #if [[ $flag_run_choice == false ]]; then
+            #read -p "Чи хочете ви запустити програму повторно? (y або Y - так, будь-що інше - ні): " continue_choice
+            #if [[ $continue_choice != "y" && $continue_choice != "Y" ]]; then
+                #break
+            #fi
+        #fi
     done
 }
-
+# Значення параметрів, що передаються в програму при запуску
+if [[ $# == 3 ]]; then
+    param_a=$1
+    param_b=$2
+    param_c=$3
+    is_valid_number "$param_a"
+    is_valid_number "$param_b"
+    is_valid_number "$param_c"
+    main "$param_a" "$param_b" "$param_c"
+elif [[ $# == 2 ]]; then
+    param_a=$1
+    param_b=$2
+    #param_c=
+    is_valid_number "$param_a"
+    is_valid_number "$param_b"
+    main "$param_a" "$param_b"
+elif [[ $# == 1 ]]; then
+    param_a=$1
+    is_valid_number "$param_a"
+    #param_b=
+    #param_c=
+    main "$param_a"
+else
+    main
+fi
 # Виклик головної функції
-main
+#main "$param_a" "$param_b" "$param_c"
