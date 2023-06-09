@@ -2,15 +2,43 @@
 #include "Discriminant.h"
 #include "Roots.h"
 #include <stdio.h>
+#include <stdlib.h>
 //#include <math.h>
+double a, b, c, x1, x2, disc;
 
-int main() {
-    double a, b, c, x1, x2, disc;
+int main(int argc, char *argv[]) {
+    
     int num_roots;
 
     // Запитуємо коефіцієнти від користувача
-    printf("Enter the coefficients a, b, c: ");
-    scanf("%lf %lf %lf", &a, &b, &c);
+    if (argc == 4){
+        a = atof(argv[1]);
+        b = atof(argv[2]);
+        c = atof(argv[3]);
+    }
+    if (argc == 1){
+        printf("Enter the coefficients a: ");
+        scanf("%lf", &a);
+        printf("Enter the coefficients b: ");
+        scanf("%lf", &b);
+        printf("Enter the coefficients c: ");
+        scanf("%lf", &c);
+    } 
+    if (argc == 2){
+        a = atof(argv[1]);
+        printf("Enter the coefficients b: ");
+        scanf("%lf", &b);
+        printf("Enter the coefficients c: ");
+        scanf("%lf", &c);
+    }
+    if (argc == 3){
+        a = atof(argv[1]);
+        b = atof(argv[2]);
+        printf("Enter the coefficients c: ");
+        scanf("%lf", &c);
+    }
+    printf("Entered coefficients: a = %lf, b = %lf, c = %lf\n", a, b, c);
+    // scanf("%lf %lf %lf", &a, &b, &c);
 
     // Обчислюємо корені рівняння
     disc = discriminant(a, b, c);
@@ -25,6 +53,6 @@ int main() {
         return 1;
     } else {
         printf("The equation does not have real roots\n");
-        return -1;
+        return 2;
     }
 }
